@@ -1,92 +1,51 @@
 package com.auca.abstracts;
 
-import java.time.LocalDate;
-
+import com.auca.exceptions.ValidationException;
 import com.auca.interfaces.Identifiable;
 import com.auca.interfaces.Registrable;
 
+import java.time.LocalDate;
 
-public abstract  class Person implements Identifiable, Registrable {
-
+public abstract class Person implements Identifiable, Registrable {
     private String personId;
     private String firstName;
     private String lastName;
     private String email;
     private String phoneNumber;
-    private  LocalDate dateOfBirth;
-    
-    
-    public Person(String personId, String firstName, String lastName, String email, String phoneNumber,
-            LocalDate dateOfBirth) {
-        this.personId = personId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.dateOfBirth = dateOfBirth;
-    }
-// Getters
+    private LocalDate dateOfBirth;
 
-    public String getPersonId() {
-        return personId;
+    protected Person(String personId, String firstName, String lastName, String email,
+                     String phoneNumber, LocalDate dateOfBirth) throws ValidationException {
+        this.personId = Registrable.requireText(personId, "Person ID",
+                Identifiable.MIN_ID_LENGTH, Identifiable.MAX_ID_LENGTH);
+        this.firstName = Registrable.requireText(firstName, "First name",
+                Registrable.MIN_NAME_LENGTH, Registrable.MAX_NAME_LENGTH);
+        this.lastName = Registrable.requireText(lastName, "Last name",
+                Registrable.MIN_NAME_LENGTH, Registrable.MAX_NAME_LENGTH);
+        this.email = Registrable.requireEmail(email, "Email");
+        this.phoneNumber = Registrable.requirePhone(phoneNumber, "Phone number");
+        this.dateOfBirth = Registrable.requireDateInPast(dateOfBirth, "Date of birth");
     }
 
-
-    public String getFirstName() {
-        return firstName;
+    @Override
+    public void validate() throws ValidationException {
+        Registrable.requireText(personId, "Person ID",
+                Identifiable.MIN_ID_LENGTH, Identifiable.MAX_ID_LENGTH);
+        Registrable.requireText(firstName, "First name",
+                Registrable.MIN_NAME_LENGTH, Registrable.MAX_NAME_LENGTH);
+        Registrable.requireText(lastName, "Last name",
+                Registrable.MIN_NAME_LENGTH, Registrable.MAX_NAME_LENGTH);
+        Registrable.requireEmail(email, "Email");
+        Registrable.requirePhone(phoneNumber, "Phone number");
+        Registrable.requireDateInPast(dateOfBirth, "Date of birth");
     }
 
+    @Override
+    public abstract boolean isActive();
 
-    public String getLastName() {
-        return lastName;
-    }
+    @Override
+    public abstract String getRoleDescription();
 
-
-    public String getEmail() {
-        return email;
-    }
-
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-// Setters
-    public void setPersonId(String personId) {
-        this.personId = personId;
-    }
-
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
- // Identifiable methods
     @Override
     public String getId() {
         return personId;
@@ -97,23 +56,70 @@ public abstract  class Person implements Identifiable, Registrable {
         return firstName + " " + lastName;
     }
 
-    // Methods to be completed by child classes
     @Override
-    public abstract boolean isActive();
-
-    public abstract String getRoleDescription();
-
-    // Display person information
-    @Override
-    public String toString() {
-        return "Person ID: " + personId
-                + "\nName: " + getDisplayName()
-                + "\nEmail: " + email
-                + "\nPhone: " + phoneNumber
-                + "\nDate of Birth: " + dateOfBirth;
+    public String getRegistrationSummary() {
+        return Identifiable.ID_PREFIX + Identifiable.ID_SEPARATOR + getId()
+                + " | " + getDisplayName()
+                + " | " + getRoleDescription()
+                + " | " + (isActive() ? "ACTIVE" : "INACTIVE");
     }
 
+    @Override
+    public void printDetails() {
+        System.out.println("  Role               : " + getRoleDescription());
+        System.out.println("  Person ID          : " + personId);
+        System.out.println("  First name         : " + firstName);
+        System.out.println("  Last name          : " + lastName);
+        System.out.println("  Email              : " + email);
+        System.out.println("  Phone              : " + phoneNumber);
+        System.out.println("  Date of birth      : " + dateOfBirth);
+    }
 
-    
-    
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{personId='" + personId + "', name='" + getDisplayName()
+                + "', email='" + email + "', phone='" + phoneNumber + "', dateOfBirth=" + dateOfBirth + "}";
+    }
+
+    public String getPersonId() {
+        return personId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) throws ValidationException {
+        this.firstName = Registrable.requireText(firstName, "First name",
+                Registrable.MIN_NAME_LENGTH, Registrable.MAX_NAME_LENGTH);
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) throws ValidationException {
+        this.lastName = Registrable.requireText(lastName, "Last name",
+                Registrable.MIN_NAME_LENGTH, Registrable.MAX_NAME_LENGTH);
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) throws ValidationException {
+        this.email = Registrable.requireEmail(email, "Email");
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) throws ValidationException {
+        this.phoneNumber = Registrable.requirePhone(phoneNumber, "Phone number");
+    }
+
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
+    }
 }
